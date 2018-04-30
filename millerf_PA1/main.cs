@@ -1,15 +1,19 @@
-﻿using System;
+﻿using EncryptWord_CSharp.Code;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace millerf_PA1
+namespace EncryptWord_CSharp
 {
     class Program
     {
         static void Main(string[] args)
         {
+            DriverProgram driver = new DriverProgram();
+            driver.RunTests();
+            Console.ReadKey();
         }
     }
 }

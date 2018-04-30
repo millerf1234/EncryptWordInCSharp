@@ -79,31 +79,29 @@ using System.IO;  //Gives access to StringWriter
 //         word is. Guesses will be tracked and statistics recorded.
 
 //NOTE:Namespace name will be updated in later submissions/iterations
-namespace millerf_PA1 
+namespace EncryptWord_CSharp 
 {
-    public class encryptWord
+    public class EncryptWord
     {
-        /*
-        //Oh Wait C# will use properties to handle get/set/store, so I don't need seperate fields...
-        ////---------------------------------------------------------------------
-        ////Private fields 
-        ////---------------------------------------------------------------------
-        //string word;  //The word to be encapsulated by this class
-        //int shift; //Number of characters to shift, should be within interval [0,26)
-        //bool state; //True if shift is on, false if shift is off
+        //---------------------------------------------------------------------
+        // Constants
+        //---------------------------------------------------------------------
+        public const int MINIMUM_WORD_LENGTH = 4;
+        public const int LETTERS_IN_ALPHABET = 26;
+        public const int INDEX_SHIFT = 1;
 
-        ////Statistics about querrys/guesses:
-        //int numOfGuesses; //Number of guesses
-        //int highestGuess; //Highest Guess
-        //int lowestGuess; //Lowest Guess
-        //int sumOfGuesses; //Sum of gueses (for computing avarage)
-        */
+
+        //---------------------------------------------------------------------
+        //Private fields 
+        //---------------------------------------------------------------------
+        private bool constructedWithWordOfProperLength;
+
         //---------------------------------------------------------------------
         // Public Properties
         //---------------------------------------------------------------------
-        public string Word  //The word to be encapsulated by this class
+        public string Word  //The word to be encapsulated by this class in its current encryption state
         {
-            get;
+            get;   //C# will auto-implement these properties apparently
             private set;
         }
 
@@ -118,7 +116,6 @@ namespace millerf_PA1
             get;
             private set;
         }
-
         public int NumOfGuesses  
         {
             get;
@@ -147,8 +144,9 @@ namespace millerf_PA1
         //---------------------------------------------------------------------
         //Constructors 
         //---------------------------------------------------------------------
-        private encryptWord() { }  //Remove the default constructor by making it private 
-
+        private EncryptWord()
+        {
+        }  //Remove the default constructor by making it private 
 
         // Constructor that takes a word to be encrypted.
         // Description: Creates a EncryptWord Object from the parameter string. Will
@@ -156,15 +154,21 @@ namespace millerf_PA1
         //              automatically encrypt the string with this shift. Will set
         //              the guess-tracking statistics to their default starting
         //              values. Will set the object into a valid state.
-        public encryptWord(string word)
+        //              Word must be at least 4 letters long or the object will become
+        //              invalid.
+        public EncryptWord(string word)
         {
-            //Initialize statistics
-            NumOfGuesses = 0;
-            HighestGuess = 0;
-            LowestGuess = 0;
-            SumOfGuesses = 0;
+            Initialize(word);
+            if (!constructedWithWordOfProperLength)
+            {
+                return;
+            }
 
-            //to implement word encryption still...
+            //Generate a random shift from between 1 and 25
+            Random rand = new Random();
+            Shift = rand.Next(INDEX_SHIFT, LETTERS_IN_ALPHABET - INDEX_SHIFT);
+
+            Word = PerformCipherShift(Word);
             State = true;
         }
 
@@ -176,16 +180,36 @@ namespace millerf_PA1
         //              automatically encrypt the string with this shift. Will set
         //              the guess-tracking statistics to their default starting
         //              values. Will set the object into a valid state.
-        public encryptWord(string word, int shift)
+        public EncryptWord(string word, int shift)
         {
-            //Initialize statistics
-            numOfGuesses = 0;
-            highestGuess = 0;
-            lowestGuess = 0;
-            sumOfGuesses = 0;
+            Initialize(word);
+            if (!constructedWithWordOfProperLength)
+            {
+                return;
+            }
 
-            //to implement word encryption still...
-            state = true;
+            //Put shift in the [0,26) range
+            PutValueInAlphabetRange(ref shift);
+            Shift = shift;
+           /* 
+            //if (Shift < 0)
+            //{
+            //    do
+            //    {
+            //        Shift += LETTERS_IN_ALPHABET;
+            //    } while (Shift < 0);
+            //}
+            //else if (Shift >= LETTERS_IN_ALPHABET)
+            //{
+            //    do
+            //    {
+            //        Shift -= LETTERS_IN_ALPHABET;
+            //    } while (Shift >= LETTERS_IN_ALPHABET);
+            //} 
+            */
+
+            Word = PerformCipherShift(Word);
+            State = true;
         }
 
 
@@ -199,15 +223,15 @@ namespace millerf_PA1
         //               object in an invalid state will cause bad things to happen.
         // Postconditions: This is constant, so the state of the object will not
         //                 change.
-        public string getEncryptedWord()
+        public string GetEncryptedWord()
         {
-            if (state)
+            if (State)
             {
-                return word;
+                return Word;
             }
             else
             {
-                return performCipherShift(word);
+                return PerformCipherShift(Word);
             }
         }
 
@@ -216,15 +240,15 @@ namespace millerf_PA1
         // Preconditions: Object must be in valid state.
         // Postconditions: Object will remain in same state as it was when this
         //                 getter was called.
-        public string getDecodedWord()
+        public string GetDecodedWord()
         {
-            if (state)
+            if (State)
             {
-                return undoCipherShift(word);
+                return UndoCipherShift(Word);
             }
             else
             {
-                return word;
+                return Word;
             }
         }
 
@@ -232,15 +256,33 @@ namespace millerf_PA1
         // Preconditions: Object must be in a valid state
         // Postconditions: Object's cipher-shift will be the opposite of what is was
         //                  before this operation.
-        public void toggleState()
+        public void ToggleState()
         {
-            //Todo -- just flip the bool state of the object, and replace the field 'word' 
+            State = !State; //Toggle state
+            if (!constructedWithWordOfProperLength)
+            {
+                return;
+            }
+            if (State)
+            {
+                //State was off before this method was called
+                Word = PerformCipherShift(Word);//So turn the encryption on
+            }
+            else
+            {
+                //The State was set to on before this method was called
+                Word = UndoCipherShift(Word); //So undo the shift to turn encryption off
+            }
         }
 
         // Description: Returns the current guess statistics stored on the object
         // Preconditions: Object must be in a valid state
         // Postconditions: None, member function is constant
-        public string getStatistics() {
+        public string GetStatistics() {
+            if (!constructedWithWordOfProperLength)
+            {
+                return "Error! Word provided to this object was shorter than 4 letters!\n";
+            }
             //see: https://msdn.microsoft.com/en-us/library/system.io.stringwriter.aspx
             StringWriter sw = new StringWriter();
             sw.WriteLine("Your Guess Statistics thus far: ");
@@ -271,7 +313,7 @@ namespace millerf_PA1
 
             sw.Write("Average Guess: ");
 
-            if (numOfGuesses > 0) //Check to make sure we don't divide by 0
+            if (NumOfGuesses > 0) //Check to make sure we don't divide by 0
             {
                 //Will this do integer or floating-point division? 
                 double averageGuess = SumOfGuesses / NumOfGuesses; //Hopefully not integer division...
@@ -292,35 +334,117 @@ namespace millerf_PA1
         // Preconditions: Object must be in the valid state
         // Postconditions: Objects guess statistics will be updated based off the
         //                 guess
-        public bool verifyShift(int guess)
+        public bool VerifyShift(int guess)
         {
-            //todo -- check guess against actual encryption (allow numbers in the same
-            //modular-addition-group cycle position to be equal (i.e. 26 == 0 == 52 ==78) )
-            //If guess is wrong, add it to guess statistics
+            if (!constructedWithWordOfProperLength)
+            {
+                return false;
+            }
+            //Add the guess to the statistics
+            AddValueToGuesses(guess);
+
+            //Put the guess in the same interval as Shift to do comparison
+            PutValueInAlphabetRange(ref guess);
+
+            if (Shift == guess)
+            {
+                return true;
+            } 
             return false;
         }
-        
+
 
 
         //---------------------------------------------------------------------
         //Private methods (helper functions)
         //---------------------------------------------------------------------
 
-        private string performCipherShift(string s)
+        //Helper function for constructors
+        private void Initialize(string word)
         {
-            //Insert code here to encrypt-shift the word
+            //Initialize statistics
+            NumOfGuesses = 0;
+            HighestGuess = 0;
+            LowestGuess = 0;
+            SumOfGuesses = 0;
+
+            if (word.Length < MINIMUM_WORD_LENGTH)
+            {
+                constructedWithWordOfProperLength = false;
+                return;
+            }
+            else
+            {
+                constructedWithWordOfProperLength = true;
+            }
+            //Initialize the rest of the object
+            Word = word;
+            Shift = 0;
+            State = false;
+        }
+
+        //Uses the value stored in Shift. 
+        private string PerformCipherShift(string s)
+        {
+            //For each letter in s
+            for (int i = 0; i < s.Length; i++ )
+            {
+                char c = s[i];
+                if (char.IsLetter(c))
+                {
+                    if (char.IsLower(c))
+                    {
+                        c = (char)((int)c + Shift);
+                        if (c > 'z')
+                        {
+                            c = (char) ((int)c - LETTERS_IN_ALPHABET);
+                        }
+                    }
+                    else //c must be an upper case letter
+                    {
+                        c = (char)((int)c + Shift);
+                        if (c > 'Z')
+                        {
+                            c = (char)((int)c - LETTERS_IN_ALPHABET);
+                        }
+                    }
+                }
+            }
             return s;
         }
 
-        private string undoCipherShift(string s)
+        private string UndoCipherShift(string s) //Undoes encryption using the shift value stored in this object
         {
-            //Insert the code here to reverse the encrypt-shift on the word
+            //For each letter in s
+            for (int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                if (char.IsLetter(c))
+                {
+                    if (char.IsLower(c))
+                    {
+                        c = (char)((int)c - Shift);
+                        if (c < 'a')
+                        {
+                            c = (char)((int)c + LETTERS_IN_ALPHABET);
+                        }
+                    }
+                    else //c must be an upper case letter
+                    {
+                        c = (char)((int)c - Shift);
+                        if (c > 'Z')
+                        {
+                            c = (char)((int)c + LETTERS_IN_ALPHABET);
+                        }
+                    }
+                }
+            }
             return s;
         }
 
-        private bool checkLengthRequirement(string s)
+        private bool CheckLengthRequirement(string s)
         {
-            if (s.Length < 4)
+            if (s.Length < MINIMUM_WORD_LENGTH)
             {
                 return false;
             }
@@ -330,14 +454,66 @@ namespace millerf_PA1
             }
         }
 
-        private void addValueToGuesses(int guess)
+        private void AddValueToGuesses(int guess)
         {
-            //Insert the code that adds the guess to this objects guess-tracking statistics. 
+            //Add the guess to this objects guess-tracking statistics. 
+            if (NumOfGuesses == 0)
+            {
+                HighestGuess = guess;
+                LowestGuess = guess;
+                SumOfGuesses = guess;
+            }
+            else //There was already a guess attempt on this word
+            {
+                if (HighestGuess < guess)
+                {
+                    HighestGuess = guess;
+                }
+                else if (LowestGuess > guess)
+                {
+                    LowestGuess = guess;
+                }
+                SumOfGuesses += guess;
+                
+            }
+            ++NumOfGuesses; //Incremnent the number of guesses
         }
 
+        private void PutValueInAlphabetRange(ref int value) //Puts that value in the range of [0,26)
+        {
+            if (value < 0)
+            {
+                do
+                {
+                    value += LETTERS_IN_ALPHABET;
+                } while (value < 0);
+            }
+            else if (value >= LETTERS_IN_ALPHABET)
+            {
+                do
+                {
+                    value -= LETTERS_IN_ALPHABET;
+                } while (value >= LETTERS_IN_ALPHABET);
+            }
+        }
+    } //End class EncryptWord
+}; //end namespace EncryptWord_CSharp
 
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*  C++ HEADER FILE FOR ENCRYPT WORD
