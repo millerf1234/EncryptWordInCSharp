@@ -8,10 +8,9 @@ using System.IO;  //Gives access to StringWriter
 // FILENAME: encryptWord.cs
 // AUTHOR: Forrest S Miller
 // DATE: April 15, 2018
-// REVISION HISTORY: None currently
+// REVISION HISTORY: Full implementation completed 4/29/2018
 // References: None
 
-//
 // Class Overview:
 //      This class defines an object that can be used to store words as strings
 //      that have been encrypted using a Ceaser cipher-shift. This object stores
@@ -84,18 +83,65 @@ namespace millerf_PA1
 {
     public class encryptWord
     {
-        //---------------------------------------------------------------------
-        //Private fields 
-        //---------------------------------------------------------------------
-        string word;  //The word to be encapsulated by this class
-        int shift; //Number of characters to shift, should be within interval [0,26)
-        bool state; //True if shift is on, false if shift is off
+        /*
+        //Oh Wait C# will use properties to handle get/set/store, so I don't need seperate fields...
+        ////---------------------------------------------------------------------
+        ////Private fields 
+        ////---------------------------------------------------------------------
+        //string word;  //The word to be encapsulated by this class
+        //int shift; //Number of characters to shift, should be within interval [0,26)
+        //bool state; //True if shift is on, false if shift is off
 
-        //Statistics about querrys/guesses:
-        int numOfGuesses; //Number of guesses
-        int highestGuess; //Highest Guess
-        int lowestGuess; //Lowest Guess
-        int sumOfGuesses; //Sum of gueses (for computing avarage)
+        ////Statistics about querrys/guesses:
+        //int numOfGuesses; //Number of guesses
+        //int highestGuess; //Highest Guess
+        //int lowestGuess; //Lowest Guess
+        //int sumOfGuesses; //Sum of gueses (for computing avarage)
+        */
+        //---------------------------------------------------------------------
+        // Public Properties
+        //---------------------------------------------------------------------
+        public string Word  //The word to be encapsulated by this class
+        {
+            get;
+            private set;
+        }
+
+        public int Shift //Number of characters used in encryption shift, should be within interval [0,26)
+        {
+            get;
+            private set;
+        }
+
+        public bool State //True if shift is on, false if shift is off
+        {
+            get;
+            private set;
+        }
+
+        public int NumOfGuesses  
+        {
+            get;
+            private set;
+        }
+
+        public int SumOfGuesses
+        {
+            get;
+            private set;
+        }
+
+        public int HighestGuess
+        {
+            get;
+            private set;
+        }
+
+        public int LowestGuess
+        {
+            get;
+            private set;
+        }
 
 
         //---------------------------------------------------------------------
@@ -113,13 +159,13 @@ namespace millerf_PA1
         public encryptWord(string word)
         {
             //Initialize statistics
-            numOfGuesses = 0;
-            highestGuess = 0;
-            lowestGuess = 0;
-            sumOfGuesses = 0;
+            NumOfGuesses = 0;
+            HighestGuess = 0;
+            LowestGuess = 0;
+            SumOfGuesses = 0;
 
             //to implement word encryption still...
-            state = true;
+            State = true;
         }
 
         //  Constructor that takes a word to be encapsulated and a predetermined shift
@@ -143,50 +189,7 @@ namespace millerf_PA1
         }
 
 
-        //---------------------------------------------------------------------
-        // Public Properties
-        //---------------------------------------------------------------------
-        public string Word
-        {
-            get;
-            private set;
-        }
-
-        public int Shift
-        {
-            get;
-            private set;
-        }
         
-        public bool State
-        {
-            get;
-            private set;
-        }
-
-        public int NumOfGuesses
-        {
-            get;
-            private set;
-        }
-
-        public int SumOfGuesses
-        {
-            get;
-            private set;
-        }
-
-        public int HighestGuess
-        {
-            get;
-            private set;
-        }
-
-        public int LowestGuess
-        {
-            get;
-            private set;
-        }
 
         //---------------------------------------------------------------------
         //Public member functions

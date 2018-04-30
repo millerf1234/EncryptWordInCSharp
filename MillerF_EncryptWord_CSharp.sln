@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 15 for Windows Desktop
+# Visual Studio 15
 VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "millerf_PA1", "millerf_PA1\millerf_PA1.csproj", "{C8AF8739-85DA-489C-8F94-2EDCF57EF4BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Millerf_EncryptWord_CSharp", "millerf_PA1\Millerf_EncryptWord_CSharp.csproj", "{C8AF8739-85DA-489C-8F94-2EDCF57EF4BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
